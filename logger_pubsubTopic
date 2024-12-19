@@ -1,0 +1,28 @@
+import time
+import random
+import json
+from google.cloud import pubsub_v1
+
+project_id = 'gcp-sa-431119'
+topic_id = 'server-logs-topic-raj'
+print(topic_id)
+
+log_levels=["WARNING","INFO","ERROR"]
+services = ["auth-service","payment-service",'order-service']
+publisher = pubsub_v1.PublisherClient()
+topic_path = publisher.topic_path(project_id, topic_id)
+
+def generate_log():
+    return {
+        "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
+        "log_level": random.choice(log_levels),
+        "service": random.choice(services),
+        "message": "This is a log message."
+    }
+
+while True:
+    log = generate_log()
+    future = publisher.publish(topic_path, json.dumps(log).encode("utf-8"))
+    print(f"Published log: {log}")
+    time.sleep(1)
+
